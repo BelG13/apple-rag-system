@@ -43,8 +43,8 @@ def main():
 
     # We initialize the ai client
     ai_client = openai.OpenAI(
-        api_key=os.environ.get('DEEPSEEK_API_KEY'),
-        base_url='https://api.deepseek.com'
+        api_key=os.environ.get('API_KEY'),
+        base_url=os.environ.get('BASE_URL')
     )
 
     # We initialize the chroma client and get the index

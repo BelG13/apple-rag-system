@@ -13,7 +13,6 @@ Features
 
 The following features are coming soon:
 - Auto sync
-- Extended model choice (to all openai api models)
 - Emails in the database.
 
 Syncs notes from the macOS Notes app to a ChromaDB vector database.
@@ -23,9 +22,9 @@ Simple command-line interface for syncing and querying.
 
 ## Prerequisites
 
-Python 3.12.9 or higher
-macOS (to access the Notes app)
-A DeepSeek API key for the language model (sign up at DeepSeek)
+- Python 3.12.9 or higher
+- macOS (to access the Notes app)
+- A valid API key compatible with the openai api.
 
 ## Setup
 1. Clone the Repository: 
@@ -49,12 +48,13 @@ pip install -r requirements.txt
 
 Create a .env file in the project root and add the following variables:
 ```
-DEEPSEEK_API_KEY=your_deepseek_api_key_here
+API_KEY=_api_key_here
+BASE_URL='your base url here'
 TOKENIZERS_PARALLELISM=true
 HF_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 ```
 
-Replace your_deepseek_api_key_here with your actual DeepSeek API key.
+Replace api_key_here with your actual LLM provider API key and BASE_URL too.
 
 ## Usage
 ### Sync Notes to ChromaDB
