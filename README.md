@@ -1,0 +1,90 @@
+
+<p align="center">
+  <img src="assets/logo.png" alt="Logo" width="400"/>
+</p>
+
+
+
+
+apple-rag-system is a Python project that syncs notes from the macOS Notes app to a ChromaDB vector database, creates embeddings using the all-MiniLM-L6-v2 model, and enables querying the notes using Retrieval-Augmented Generation (RAG) with a language model.
+Features
+
+### Upcoming
+
+The following features are coming soon:
+- Auto sync
+- Extended model choice (to all openai api models)
+- Emails in the database.
+
+Syncs notes from the macOS Notes app to a ChromaDB vector database.
+Generates embeddings for notes using the all-MiniLM-L6-v2 model by default.
+Allows users to ask questions about their notes using RAG.
+Simple command-line interface for syncing and querying.
+
+## Prerequisites
+
+Python 3.12.9 or higher
+macOS (to access the Notes app)
+A DeepSeek API key for the language model (sign up at DeepSeek)
+
+## Setup
+1. Clone the Repository: 
+```
+git clone https://github.com/BelG13/apple-rag-system.git
+cd apple-rag-system
+```
+
+2. Create a Virtual Environment: 
+```
+python -m venv venv
+source venv/bin/activate
+```
+
+3. Install Dependencies: 
+```
+pip install -r requirements.txt
+```
+
+4. Configure Environment Variables:
+
+Create a .env file in the project root and add the following variables:
+```
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
+TOKENIZERS_PARALLELISM=true
+HF_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+```
+
+Replace your_deepseek_api_key_here with your actual DeepSeek API key.
+
+## Usage
+### Sync Notes to ChromaDB
+To sync notes from the macOS Notes app to the ChromaDB vector database and generate embeddings:
+```
+python ingestion.py --flush
+```
+Remove the flush argument if you want to update your vector database.
+
+This command:
+
+- Extracts notes from the macOS Notes app.
+- Creates embeddings using the all-MiniLM-L6-v2 model.
+- Stores the embeddings in ChromaDB.
+
+### Query Notes
+To ask a question about your notes using RAG:
+```
+python query.py --query="Your question here"
+```
+
+This command retrieves relevant notes from ChromaDB and uses the language model to generate an answer.
+
+## Notes
+
+Ensure the macOS Notes app is installed and contains the notes you want to sync.
+The HF_EMBEDDING_MODEL can be changed to another Hugging Face embedding model, but all-MiniLM-L6-v2 is the default.
+Set TOKENIZERS_PARALLELISM to true or false based on your performance needs.
+
+## Contributing
+Contributions are welcome! Please open an issue or submit a pull request with improvements or bug fixes.
+License
+This project is licensed under the MIT License. See the LICENSE file for details.
