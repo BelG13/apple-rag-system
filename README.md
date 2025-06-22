@@ -14,6 +14,7 @@ Features
 The following features are coming soon:
 - Auto sync optimization.
 - Emails in the database.
+- UI interface.
 
 Syncs notes from the macOS Notes app to a ChromaDB vector database.
 Generates embeddings for notes using the all-MiniLM-L6-v2 model by default.

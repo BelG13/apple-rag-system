@@ -62,7 +62,8 @@ class Listerner():
         try:
             while True:
 
-                if self.last_number_fetched == self.find_number_fectched(): # type: ignore
+                number_of_records = self.find_number_fectched()
+                if self.last_number_fetched == number_of_records:
                     _logger.info('The database is up to date.')
                     time.sleep(20)
                     continue
@@ -73,6 +74,7 @@ class Listerner():
                     flush=True,
                     db_path='./chroma',
                 )
+                self.last_number_fetched = number_of_records
 
         except KeyboardInterrupt:
             _logger.info('The user stopped the server with crtl-c')
