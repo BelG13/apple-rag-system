@@ -1,67 +1,57 @@
-import argparse
 import chromadb
 import openai
-import os
+import logging
 
 from colorama import Fore, Style
-from dotenv import load_dotenv
 
-def main():
-    """Ask a question about something in the notes and an AI answers it.
+from typing import Dict
+
+_logger = logging.getLogger(name='QUERY')
+
+def query(
+        index_name: str,
+        query: str,
+        db_path: str,
+        n_results: int,
+        debug: bool,
+        api_key: str,
+        base_url: str,
+        **kwargs: Dict
+
+):
+    """_summary_
+
+    Args:
+        index_name (str): Name of the collection 
+        query (str): Question for the LLM.
+        db_path (str): path to the database.
+        n_results (int): Number of document to get with rag.
+        debug (bool): True for debug mode.
+        api_key (str): oai compatible api key.
+        base_url (str): oai compatible base url.
     """
-
-    # Load the env variables
-    load_dotenv('.env')
-
-    # Argument parsing
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--query',
-        help='Query to the Notes.app .'
-    )
-    parser.add_argument(
-        '--db_path',
-        default='./chroma',
-        help='Path to the chroma vector database.'
-    )
-    parser.add_argument(
-        '--index_name',
-        default='notes',
-        help='The name of the db collection.'
-    )
-    parser.add_argument(
-        '--n_results',
-        type=int,
-        default=3,
-        help='Number of documents to return'
-    )
-    parser.add_argument(
-        '--debug',
-        action='store_true'
-    )
-    args = parser.parse_args()
 
     # We initialize the ai client
     ai_client = openai.OpenAI(
-        api_key=os.environ.get('DEEPSEEK_API_KEY'),
-        base_url='https://api.deepseek.com'
+        api_key=api_key,
+        base_url=base_url
     )
 
     # We initialize the chroma client and get the index
     chroma_client = chromadb.PersistentClient(
-        path=args.db_path
+        path=db_path
     )
     index = chroma_client.get_collection(
-        name=args.index_name
+        name=index_name
     )
     results = index.query(
-        query_texts=[args.query],
-        n_results=args.n_results
+        query_texts=[query],
+        n_results=n_results
     )
 
     # We create a string representing the rag outputs.
     rag_result = ''
-    for i in range(args.n_results):
+    for i in range(n_results):
         metadata = results['metadatas'][0][i] # type: ignore
         content = results['documents'][0][i] # type: ignore
         
@@ -72,7 +62,7 @@ def main():
     # We inject the rag output and the user question in the prompt
     with open('./prompts/rag_prompt.txt', 'r') as prompt_template:
         prompt = prompt_template.read().format(
-            user_query=args.query,
+            user_query=query,
             documents=rag_result
         )
 
@@ -86,16 +76,14 @@ def main():
         stream=True
     )
 
-    if args.debug:
+    if debug:
         print(f'\n{Fore.YELLOW}Prompt: {Fore.CYAN}{prompt}')
     
-    print(f'{Fore.YELLOW}Response: \n{Fore.CYAN}')
+    # print(f'{Fore.YELLOW}Response: \n{Fore.CYAN}')
+    _logger.info(f'API response : \n')
     for chunk in stream:
         content = getattr(chunk.choices[0].delta, 'content', None)
         if content:
-            print(content, end='', flush=True)
+            print(f'{Fore.CYAN}{content}', end='', flush=True)
             
     print(f'{Style.RESET_ALL}')
-
-if __name__ == "__main__":
-    main()

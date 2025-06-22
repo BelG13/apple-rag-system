@@ -12,8 +12,9 @@ Features
 ### Upcoming
 
 The following features are coming soon:
-- Auto sync
+- Auto sync optimization.
 - Emails in the database.
+- UI interface.
 
 Syncs notes from the macOS Notes app to a ChromaDB vector database.
 Generates embeddings for notes using the all-MiniLM-L6-v2 model by default.
@@ -52,15 +53,17 @@ API_KEY=_api_key_here
 BASE_URL='your base url here'
 TOKENIZERS_PARALLELISM=true
 HF_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+DB_PATH='path to your chroma db, default is ./chroma'
 ```
 
 Replace api_key_here with your actual LLM provider API key and BASE_URL too.
 
 ## Usage
 ### Sync Notes to ChromaDB
+#### Manual Sync
 To sync notes from the macOS Notes app to the ChromaDB vector database and generate embeddings:
 ```
-python ingestion.py --flush
+python main.py --mode='sync' --flush
 ```
 Remove the flush argument if you want to update your vector database.
 
@@ -70,10 +73,19 @@ This command:
 - Creates embeddings using the all-MiniLM-L6-v2 model.
 - Stores the embeddings in ChromaDB.
 
+#### Auto sync
+To sync notes automatically from the macOS Notes app to the ChromaDB vector database and generate embeddings:
+```
+python -m src.auto-sync.listen --index_name='your index name, notes by default'
+```
+
+This command periodically and Extracts notes from the macOS Notes app and update the chroma database if there
+is new notes that are not stored.
+
 ### Query Notes
 To ask a question about your notes using RAG:
 ```
-python query.py --query="Your question here"
+python main.py --mode='query' --query="Your question here"
 ```
 
 This command retrieves relevant notes from ChromaDB and uses the language model to generate an answer.
