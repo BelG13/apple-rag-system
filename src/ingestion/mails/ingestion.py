@@ -14,7 +14,7 @@ from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunct
 _logger = logging.getLogger(name='MAIL_INGESTION')
 
 
-def get_mails(n_emails: int = 10) -> List[Dict[str, str]]:
+def get_mails(n_emails: int = 100) -> List[Dict[str, str]]:
     """Fetch the emails from the mail app.
 
     Args:
@@ -49,7 +49,7 @@ def get_mails(n_emails: int = 10) -> List[Dict[str, str]]:
             email_id = num.decode() if isinstance(num, bytes) else str(num)
             
             # Fetch email data with BODY[] to get full message
-            status, data = mail.fetch(email_id, "(BODY[])")
+            status, data = mail.fetch(email_id, "(BODY.PEEK[])")
             
             # Check if data is in the expected format
             if not data or not isinstance(data, list) or len(data) == 0:
