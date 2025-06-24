@@ -26,6 +26,7 @@ Simple command-line interface for syncing and querying.
 - Python 3.12.9 or higher
 - macOS (to access the Notes app)
 - A valid API key compatible with the openai api.
+- A valid Apple [password app](https://support.apple.com/en-ca/102654) 
 
 ## Setup
 1. Clone the Repository: 
@@ -54,9 +55,9 @@ BASE_URL='your base url here'
 TOKENIZERS_PARALLELISM=true
 HF_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 DB_PATH='path to your chroma db, default is ./chroma'
+APPLE_EMAIL_KEY='your apple password app'
+APPLE_EMAIL='your apple email'
 ```
-
-Replace api_key_here with your actual LLM provider API key and BASE_URL too.
 
 ## Usage
 ### Sync Notes to ChromaDB
