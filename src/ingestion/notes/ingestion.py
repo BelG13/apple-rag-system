@@ -9,7 +9,7 @@ import chromadb.errors
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
 
-_logger = logging.getLogger('INGESTION')
+_logger = logging.getLogger('NOTE_INGESTION')
 
 
 def get_all_notes(ignore_empty_title: bool = True) -> List[Dict[str, str]]:
@@ -22,7 +22,7 @@ def get_all_notes(ignore_empty_title: bool = True) -> List[Dict[str, str]]:
         List[Dict[str, str]]: a list of dict, each dict represents a note and its data.
     """
 
-    _logger.info('Running the osascript to extract the notes from the app')
+    _logger.info('Extracting raw notes.')
 
     # We run the fetching script
     result = subprocess.run(['osascript', './applescripts/fetch_notes.scpt'], capture_output=True, text=True)
@@ -91,7 +91,6 @@ def parse_raw_notes_data(data: str, ignore_empty_title: bool = True) -> List[Dic
     return notes
 
 def sync_notes_data(
-        index_name: str,
         flush: bool,
         db_path: str,
         notes_data: Optional[List[Dict[str, str]]] | None = None,
@@ -142,12 +141,12 @@ def sync_notes_data(
     
     if flush:
         try:
-            chroma_client.delete_collection(index_name)
+            chroma_client.delete_collection('notes')
         except chromadb.errors.NotFoundError:
-            _logger.info(f'The index --{index_name}-- do not exist, we continue forward')
+            _logger.info(f'The index --{'notes'}-- do not exist, we continue forward')
 
     chroma_client.get_or_create_collection(
-        name=index_name,
+        name='notes',
         embedding_function=SentenceTransformerEmbeddingFunction(
             model_name=os.environ.get('HF_EMBEDDING_MODEL', 'all-MiniLM-L6-v2')
         ) # type: ignore
@@ -155,7 +154,7 @@ def sync_notes_data(
 
     # Update the index
     index = chroma_client.get_collection(
-        name=index_name
+        name='notes'
     )
 
     try:
@@ -168,4 +167,4 @@ def sync_notes_data(
         _logger.error(e)
         _logger.warning('Due to the error no element has been added to the vector database.')
 
-    _logger.info('Chromadb vector database up to date.')
+    _logger.info('Chromadb notes vector database up to date.')
