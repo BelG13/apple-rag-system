@@ -4,7 +4,7 @@ import logging
 import argparse
 import os
 
-from src.ingestion import get_all_notes, sync_notes_data
+from src.ingestion.notes.ingestion import get_all_notes, sync_notes_data
 
 from colorama import Fore, Style
 from dotenv import load_dotenv
@@ -20,7 +20,7 @@ _logger = logging.getLogger(name='AUTO-SYNC')
 
 class Listerner():
 
-    def __init__(self, index_name: str):
+    def __init__(self):
         """Initialize the listener object. connect to the db and get the number of records.
 
         Args:
@@ -28,12 +28,12 @@ class Listerner():
         """
         
         # Get db credentials
-        self.connect_to_db(index_name)
+        self.connect_to_db()
 
         # Get current number of elements in the db
         self.last_number_fetched = len(self.metadatas) # type: ignore
 
-    def connect_to_db(self, index_name:str):
+    def connect_to_db(self):
         """Connect to the chromadb database and get the index and metadatas.
 
         Args:
@@ -41,7 +41,7 @@ class Listerner():
         """
         # Connect to the database
         self.chroma_client = chromadb.PersistentClient(path=os.environ.get('DB_PATH', './chroma'))
-        self.index = self.chroma_client.get_collection(name=index_name)
+        self.index = self.chroma_client.get_collection(name='notes')
         self.metadatas = self.index.get(include=['metadatas']).get('metadatas', [])
 
     def find_number_fectched(self):
@@ -70,7 +70,6 @@ class Listerner():
                 
                 _logger.info('The database is not up to date.')
                 sync_notes_data(
-                    index_name='notes',
                     flush=True,
                     db_path='./chroma',
                 )
@@ -81,24 +80,9 @@ class Listerner():
 
 
 
-def main():
+def start_auto_sync():
     """handle the auto-sync process
     """
-    
-    # Load the .env variables
-    load_dotenv('.env')
-
-    # handle the commandline args
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--index_name',
-        default='notes'
-    )
-    args = parser.parse_args()
-
     # Monitoring
-    listener = Listerner(**vars(args))
+    listener = Listerner()
     listener.start()
-
-if __name__ == '__main__':
-    main()

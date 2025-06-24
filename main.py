@@ -2,7 +2,9 @@ import argparse
 import os
 import logging
 
-from src.ingestion import sync_notes_data
+from src.ingestion.notes.ingestion import sync_notes_data
+from src.ingestion.mails.ingestion import sync_mails_data
+from src.ingestion.auto_sync.listen import start_auto_sync
 from src.query import query
 
 from dotenv import load_dotenv
@@ -34,12 +36,6 @@ def main():
 
     # General arguments
     parser.add_argument(
-        '--index_name',
-        type=str,
-        default='notes',
-        help='Name of the chromadb vector database collection'
-    )
-    parser.add_argument(
         '--debug',
         action='store_true'
     )
@@ -50,6 +46,10 @@ def main():
         action='store_true',
         default=False,
         help='If this flag is present we reset the chroma vector database'
+    )
+    parser.add_argument(
+        '--auto',
+        action='store_true'
     )
 
     # Query args
@@ -67,8 +67,12 @@ def main():
     # get the args values
     args = parser.parse_args()
     
-    if args.mode == 'sync':
+    if args.mode == 'sync' and args.auto:
+        start_auto_sync()
+        
+    elif args.mode == 'sync':
         sync_notes_data(db_path=os.environ.get('DB_PATH', './chroma'), **vars(args))
+        sync_mails_data(db_path=os.environ.get('DB_PATH', './chroma'), **vars(args))
 
     elif args.mode == 'query':
         query(
