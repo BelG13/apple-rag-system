@@ -76,7 +76,7 @@ This command:
 #### Auto sync
 To sync notes automatically from the macOS Notes app to the ChromaDB vector database and generate embeddings:
 ```
-python -m src.auto-sync.listen --index_name='your index name, notes by default'
+python main.py --mode='sync' --auto'
 ```
 
 This command periodically and Extracts notes from the macOS Notes app and update the chroma database if there
