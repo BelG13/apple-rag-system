@@ -1,12 +1,11 @@
 import chromadb
-import openai
-import logging
-
-from colorama import Fore, Style
 
 from typing import Dict, Literal
+from colorama import Fore, Style
+from .memory import Agent
 
-_logger = logging.getLogger(name='QUERY')
+from src.utils import get_logger
+_logger = get_logger(name='QUERY')
 
 def query(
         query: str,
@@ -31,51 +30,45 @@ def query(
     """
 
     # We initialize the ai client
-    ai_client = openai.OpenAI(
+    _logger.info('Initialize the Agent')
+    agent = Agent(
         api_key=api_key,
-        base_url=base_url
+        base_url=base_url,
+        model='deepseek-chat'
     )
 
     # We initialize the chroma client and get the index
+    _logger.info('Connect to the vector database...')
     chroma_client = chromadb.PersistentClient(
         path=db_path
     )
 
-    # We get the rag content
-    rag_content = '========= Notes =========\n'
-    rag_content += get_rag_content(chroma_client, 'notes', query, n_results)
+    # Conversation loop
+    _logger.info(f'Starting the conversation loop : \n')
+    while query:
 
-    rag_content += '========= Mails =========\n'
-    rag_content += get_rag_content(chroma_client, 'mails', query, n_results)
+        # We get the rag content
+        rag_content = '========= Notes =========\n'
+        rag_content += get_rag_content(chroma_client, 'notes', query, n_results)
 
-    # We inject the rag output and the user question in the prompt
-    with open('./prompts/rag_prompt.txt', 'r') as prompt_template:
-        prompt = prompt_template.read().format(
-            user_query=query,
-            documents=rag_content
+        rag_content += '========= Mails =========\n'
+        rag_content += get_rag_content(chroma_client, 'mails', query, n_results)
+
+        # We inject the rag output and the user question in the prompt
+        with open('./prompts/rag_prompt.txt', 'r') as prompt_template:
+            prompt = prompt_template.read().format(
+                user_query=query,
+                documents=rag_content
+            )
+
+        # We stream the answer from the ai client
+        agent.query(
+            prompt=prompt,
+            stream=True
         )
 
-    # We stream the answer from the ai client
-    stream = ai_client.chat.completions.create(
-        model='deepseek-chat',
-        messages=[
-            {'role': 'system', 'content': 'You are a helpul ai assistant.'},
-            {'role': 'user', 'content': prompt}
-        ],
-        stream=True
-    )
-
-    if debug:
-        print(f'\n{Fore.YELLOW}Prompt: {Fore.CYAN}{prompt}')
-    
-    # print(f'{Fore.YELLOW}Response: \n{Fore.CYAN}')
-    _logger.info(f'API response : \n')
-    for chunk in stream:
-        content = getattr(chunk.choices[0].delta, 'content', None)
-        if content:
-            print(f'{Fore.CYAN}{content}', end='', flush=True)
-            
-    print(f'{Style.RESET_ALL}')
+        print(f'{Fore.BLUE}Your turn ? : {Fore.LIGHTRED_EX}', sep='', flush=True)
+        query = input()
 
 def get_rag_content(
         client,

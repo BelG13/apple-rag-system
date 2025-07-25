@@ -1,21 +1,14 @@
 import chromadb
 import time
-import logging
 import os
 
 from src.ingestion.notes.ingestion import get_all_notes, sync_notes_data
 from src.ingestion.mails.ingestion import get_mails, sync_mails_data
 
-from colorama import Fore, Style
 from typing import Literal
 
-
-logging.basicConfig(
-    level=logging.INFO,
-    format=f'[{Fore.YELLOW}%(asctime)s] {Fore.LIGHTRED_EX}[%(levelname)s] {Fore.GREEN}%(name)s: {Fore.BLUE}%(message)s{Style.RESET_ALL}',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-_logger = logging.getLogger(name='AUTO-SYNC')
+from src.utils import get_logger
+_logger = get_logger(name='AUTO-SYNC')
 
 
 class Listerner():

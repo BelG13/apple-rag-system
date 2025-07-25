@@ -9,7 +9,8 @@ import chromadb.errors
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
 
-_logger = logging.getLogger('NOTE_INGESTION')
+from src.utils import get_logger
+_logger = get_logger('NOTE_INGESTION')
 
 
 def get_all_notes(ignore_empty_title: bool = True) -> List[Dict[str, str]]:

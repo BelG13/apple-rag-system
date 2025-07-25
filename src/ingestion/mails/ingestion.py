@@ -1,5 +1,4 @@
 import imaplib
-import logging
 import os
 import chromadb
 
@@ -10,8 +9,8 @@ from typing import Dict, List
 import chromadb.errors
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
-
-_logger = logging.getLogger(name='MAIL_INGESTION')
+from src.utils import get_logger
+_logger = get_logger(name='MAIL_INGESTION')
 
 
 def get_mails(n_emails: int = 100) -> List[Dict[str, str]]:
@@ -34,7 +33,7 @@ def get_mails(n_emails: int = 100) -> List[Dict[str, str]]:
     # Fetch messages
     status, messages = mail.search(None, "ALL")
     if status != "OK" or not messages[0]:
-        logging.error("Error: No messages found or search failed")
+        _logger.error("Error: No messages found or search failed")
         mail.logout()
         exit()
 
